@@ -165,10 +165,10 @@ function errorMessage(error: unknown): SetupError {
 }
 
 const dependencyGuidance: Record<string, string> = {
-  sections: 'In Step 3, delete the sections in this class after moving any students and teachers out of them.',
+  sections: 'In Step 4, delete the sections in this class after moving any students and teachers out of them.',
   students: 'Open Students and move the linked students to another class or section first.',
   teachers: 'Open Teachers, edit the linked teachers, and remove this section or subject from their assignments.',
-  classes: 'In Step 2, edit the linked classes and deselect this subject first.',
+  classes: 'In Step 3, edit the linked classes and deselect this subject first.',
   exams: 'Open Exams and remove or move the linked exam records first.',
   student_academic_history: 'Academic history must be retained. Rename or deactivate this academic year instead of deleting it.',
   legacy_student_assignments: 'Move the older student records to a current class and section first.',
@@ -561,33 +561,42 @@ export default function AcademicSetupManager({ onChanged, onOpenTeachers, classN
 
       <nav aria-label="Academic setup steps" className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 shadow-sm">
         <div className="mb-3">
-          <p className="text-sm font-extrabold text-slate-900">Set up academics in this order</p>
-          <p className="mt-0.5 text-xs text-slate-600">Complete each step once. The same database records will then appear in student, teacher, exam, fee, and timetable screens.</p>
+          <p className="text-sm font-extrabold text-slate-900">Set up academics in this sequential order</p>
+          <p className="mt-0.5 text-xs text-slate-600">Follow steps 1 through 5 in order. The configured database records will automatically sync across student, teacher, exam, fee, and timetable screens.</p>
         </div>
-        <div className="grid gap-2 md:grid-cols-4">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
           <WorkflowStep
             step={1}
+            title="Academic Year & Batch"
+            detail={academicYears.length ? `${academicYears[0]?.name || 'Batch configured'} ${academicYears[0]?.is_active ? '• Active' : ''}` : 'Configure active batch'}
+            onClick={() => document.getElementById('academic-years')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          />
+          <WorkflowStep
+            step={2}
             title="Create subjects"
             detail={`${subjects.length} ${subjects.length === 1 ? 'subject' : 'subjects'} created`}
             onClick={() => document.getElementById('academic-subjects')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           />
           <WorkflowStep
-            step={2}
+            step={3}
             title="Create classes"
-            detail={`Choose subjects • ${classes.length} created`}
+            detail={`Assign subjects • ${classes.length} created`}
             onClick={() => document.getElementById('academic-classes')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           />
           <WorkflowStep
-            step={3}
+            step={4}
             title="Add sections"
-            detail={`Choose a class • ${sections.length} created`}
+            detail={`Select class • ${sections.length} created`}
             onClick={() => document.getElementById('academic-sections')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           />
           <WorkflowStep
-            step={4}
+            step={5}
             title="Assign teachers"
-            detail="Open Teachers and edit a teacher"
-            onClick={onOpenTeachers}
+            detail="Open Teacher Profiles"
+            onClick={() => {
+              if (onOpenTeachers) onOpenTeachers();
+              else document.getElementById('academic-teachers')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
           />
         </div>
       </nav>
@@ -657,43 +666,91 @@ export default function AcademicSetupManager({ onChanged, onOpenTeachers, classN
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <article className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="space-y-6">
+        {/* Step 1: Academic Year & Batch */}
+        <article id="academic-years" className="scroll-mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 bg-slate-50/70 p-4">
-            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><CalendarDays className="h-4 w-4 text-indigo-600" /> Academic Years</h3>
-            <p className="mt-1 text-[11px] text-slate-500">Create the terms shown in academic-year selectors.</p>
+            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+              <StepBadge number={1} />
+              <CalendarDays className="h-4 w-4 text-indigo-600" />
+              Academic Year & Batch
+            </h3>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Configure the active school term and batch dates shown across academic selectors, student history, and reports.
+            </p>
           </div>
           {(academicYears.length === 0 || editingYearId !== null) ? (
-            <form onSubmit={saveYear} className="grid gap-3 border-b border-slate-100 p-4 sm:grid-cols-2">
-              <label className={`${labelClass} sm:col-span-2`}>Academic year name
-                <input required maxLength={20} value={yearForm.name} onChange={(event) => setYearForm((current) => ({ ...current, name: event.target.value }))} placeholder="Enter academic year name" className={inputClass} />
+            <form onSubmit={saveYear} className="grid gap-3 border-b border-slate-100 p-4 sm:grid-cols-3">
+              <label className={`${labelClass} sm:col-span-3`}>
+                Academic year / Batch name
+                <input
+                  required
+                  maxLength={20}
+                  value={yearForm.name}
+                  onChange={(event) => setYearForm((current) => ({ ...current, name: event.target.value }))}
+                  placeholder="e.g. Batch-2026 or 2026-2027"
+                  className={inputClass}
+                />
               </label>
-              <label className={labelClass}>Starts on
-                <input required type="date" value={yearForm.startsOn} onChange={(event) => setYearForm((current) => ({ ...current, startsOn: event.target.value }))} className={inputClass} />
+              <label className={labelClass}>
+                Starts on
+                <input
+                  required
+                  type="date"
+                  value={yearForm.startsOn}
+                  onChange={(event) => setYearForm((current) => ({ ...current, startsOn: event.target.value }))}
+                  className={inputClass}
+                />
               </label>
-              <label className={labelClass}>Ends on
-                <input required type="date" value={yearForm.endsOn} onChange={(event) => setYearForm((current) => ({ ...current, endsOn: event.target.value }))} className={inputClass} />
+              <label className={labelClass}>
+                Ends on
+                <input
+                  required
+                  type="date"
+                  value={yearForm.endsOn}
+                  onChange={(event) => setYearForm((current) => ({ ...current, endsOn: event.target.value }))}
+                  className={inputClass}
+                />
               </label>
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 sm:col-span-2">
-                <input type="checkbox" checked={yearForm.isActive} onChange={(event) => setYearForm((current) => ({ ...current, isActive: event.target.checked }))} className="h-4 w-4 rounded border-slate-300 text-indigo-600" />
-                Set as active academic year
-              </label>
-              <FormActions entityLabel="academic year" editing={editingYearId !== null} busy={busyAction === 'year-save'} onCancel={cancelYearEdit} />
+              <div className="flex items-center sm:pt-4">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={yearForm.isActive}
+                    onChange={(event) => setYearForm((current) => ({ ...current, isActive: event.target.checked }))}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  Set as active academic year
+                </label>
+              </div>
+              <FormActions
+                entityLabel="academic year"
+                editing={editingYearId !== null}
+                busy={busyAction === 'year-save'}
+                onCancel={cancelYearEdit}
+              />
             </form>
           ) : (
             <div className="border-b border-slate-100 bg-slate-50/60 p-4 text-xs text-slate-600 flex items-center justify-between">
-              <span>Each school has one batch/academic year. Click the edit button below to change the batch name or dates as the year changes.</span>
+              <span>Each school has one active batch/academic year. Click the edit button below to change the batch name or dates as the year changes.</span>
             </div>
           )}
-          <div className="max-h-72 divide-y divide-slate-100 overflow-auto">
+          <div className="divide-y divide-slate-100">
             {academicYears.length ? academicYears.map((year) => (
               <div key={year.id} className="flex items-center justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <p className="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-900">
                     {year.name}
-                    {year.is_active && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-extrabold uppercase text-emerald-700">Active</span>}
+                    {year.is_active && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-emerald-700 border border-emerald-200">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                        Active
+                      </span>
+                    )}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-slate-500">{year.startsOn} to {year.endsOn}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">
+                    <span className="font-semibold text-slate-600">Term Duration:</span> {year.startsOn} to {year.endsOn}
+                  </p>
                 </div>
                 <RowActions
                   label={year.name}
@@ -710,75 +767,163 @@ export default function AcademicSetupManager({ onChanged, onOpenTeachers, classN
           </div>
         </article>
 
+        {/* Step 2: Create Subjects */}
         <article id="academic-subjects" className="scroll-mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 bg-slate-50/70 p-4">
-            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><StepBadge number={1} /><BookOpen className="h-4 w-4 text-indigo-600" /> Create Subjects</h3>
-            <p className="mt-1 text-[11px] text-slate-500">Create subjects before assigning them to classes or teachers.</p>
+            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+              <StepBadge number={2} />
+              <BookOpen className="h-4 w-4 text-indigo-600" />
+              Create Subjects
+            </h3>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Create subjects before assigning them to classes or teachers in subsequent steps.
+            </p>
           </div>
           <form onSubmit={saveSubject} className="border-b border-slate-100 p-4">
-            <label className={labelClass}>Subject name
-              <input required maxLength={120} value={subjectName} onChange={(event) => setSubjectName(event.target.value)} placeholder="Enter subject name" className={inputClass} />
-            </label>
-            <FormActions entityLabel="subject" editing={editingSubjectId !== null} busy={busyAction === 'subject-save'} onCancel={cancelSubjectEdit} />
+            <div className="grid gap-3 sm:grid-cols-3">
+              <label className={`${labelClass} sm:col-span-2`}>
+                Subject name
+                <input
+                  required
+                  maxLength={120}
+                  value={subjectName}
+                  onChange={(event) => setSubjectName(event.target.value)}
+                  placeholder="Enter subject name (e.g. Mathematics, English, Science, Computer)"
+                  className={inputClass}
+                />
+              </label>
+              <div className="flex items-end">
+                <FormActions
+                  entityLabel="subject"
+                  editing={editingSubjectId !== null}
+                  busy={busyAction === 'subject-save'}
+                  onCancel={cancelSubjectEdit}
+                />
+              </div>
+            </div>
           </form>
-          <div className="max-h-72 divide-y divide-slate-100 overflow-auto">
-            {sortedSubjects.length ? sortedSubjects.map((subject) => {
-              const assignedCount = classes.filter((classroom) => classSubjectIds(classroom).includes(subject.id)).length;
-              return (
-                <div key={subject.id} className="flex items-center justify-between gap-3 p-4">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-900">{subject.name}</p>
-                    <p className="mt-0.5 text-[11px] text-slate-500">Assigned to {assignedCount} {assignedCount === 1 ? 'class' : 'classes'}</p>
-                  </div>
-                  <RowActions
-                    label={subject.name}
-                    disabled={Boolean(busyAction)}
-                    deleting={busyAction === `subject-delete-${subject.id}`}
-                    onEdit={() => { setEditingSubjectId(subject.id); setSubjectName(subject.name); }}
-                    onDelete={() => void remove('subject', subject.id, `subject ${subject.name}`, `/subjects/${subject.id}/`)}
-                  />
-                </div>
-              );
-            }) : <EmptyRow text="No subjects have been created." />}
+          <div className="p-4">
+            {sortedSubjects.length ? (
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {sortedSubjects.map((subject) => {
+                  const assignedCount = classes.filter((classroom) => classSubjectIds(classroom).includes(subject.id)).length;
+                  return (
+                    <div
+                      key={subject.id}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50/60 p-3 transition hover:border-indigo-200 hover:bg-indigo-50/30"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-bold text-slate-900">{subject.name}</p>
+                        <p className="mt-0.5 text-[10px] font-semibold text-slate-500">
+                          Assigned to {assignedCount} {assignedCount === 1 ? 'class' : 'classes'}
+                        </p>
+                      </div>
+                      <RowActions
+                        compact
+                        label={subject.name}
+                        disabled={Boolean(busyAction)}
+                        deleting={busyAction === `subject-delete-${subject.id}`}
+                        onEdit={() => { setEditingSubjectId(subject.id); setSubjectName(subject.name); }}
+                        onDelete={() => void remove('subject', subject.id, `subject ${subject.name}`, `/subjects/${subject.id}/`)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyRow text="No subjects have been created yet. Enter a subject name above to create your first subject." />
+            )}
           </div>
         </article>
 
-        <article id="academic-classes" className="scroll-mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
+        {/* Step 3: Create Classes and Choose Their Subjects */}
+        <article id="academic-classes" className="scroll-mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 bg-slate-50/70 p-4">
-            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><StepBadge number={2} /><Layers3 className="h-4 w-4 text-indigo-600" /> Create Classes and Choose Their Subjects</h3>
-            <p className="mt-1 text-[11px] text-slate-500">Create one class at a time. The class code is generated from its name; display order controls dropdown and promotion order.</p>
+            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+              <StepBadge number={3} />
+              <Layers3 className="h-4 w-4 text-indigo-600" />
+              Create Classes and Choose Their Subjects
+            </h3>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Create one class at a time. The class code is generated from its name; display order controls dropdown and promotion order.
+            </p>
           </div>
           <form onSubmit={saveClass} className="grid gap-3 border-b border-slate-100 p-4 md:grid-cols-3">
-            <label className={labelClass}>Class name
-              <input required maxLength={80} value={classForm.name} onChange={(event) => {
-                const name = event.target.value;
-                setClassForm((current) => ({
-                  ...current,
-                  name,
-                  code: editingClassId === null ? classCodeFromName(name) : current.code,
-                }));
-              }} placeholder="Enter class name" className={inputClass} />
+            <label className={labelClass}>
+              Class name
+              <input
+                required
+                maxLength={80}
+                value={classForm.name}
+                onChange={(event) => {
+                  const name = event.target.value;
+                  setClassForm((current) => ({
+                    ...current,
+                    name,
+                    code: editingClassId === null ? classCodeFromName(name) : current.code,
+                  }));
+                }}
+                placeholder="Enter class name (e.g. Class 1, Grade 10)"
+                className={inputClass}
+              />
             </label>
-            <label className={labelClass}>Unique class code
-              <input required maxLength={80} value={classForm.code} onChange={(event) => setClassForm((current) => ({ ...current, code: event.target.value }))} placeholder="Enter unique code" className={inputClass} />
+            <label className={labelClass}>
+              Unique class code
+              <input
+                required
+                maxLength={80}
+                value={classForm.code}
+                onChange={(event) => setClassForm((current) => ({ ...current, code: event.target.value }))}
+                placeholder="Enter unique code"
+                className={inputClass}
+              />
             </label>
-            <label className={labelClass}>Display / promotion order
-              <input required type="number" min={0} value={classForm.sortOrder} onChange={(event) => setClassForm((current) => ({ ...current, sortOrder: Number(event.target.value) || 0 }))} className={inputClass} />
+            <label className={labelClass}>
+              Display / promotion order
+              <input
+                required
+                type="number"
+                min={0}
+                value={classForm.sortOrder}
+                onChange={(event) => setClassForm((current) => ({ ...current, sortOrder: Number(event.target.value) || 0 }))}
+                className={inputClass}
+              />
             </label>
             <fieldset className="md:col-span-3">
-              <legend className={labelClass}>Subjects taught in this class</legend>
+              <legend className={labelClass}>
+                Subjects taught in this class
+                {classForm.subjectIds.length > 0 && (
+                  <span className="ml-2 font-bold text-indigo-600 lowercase">
+                    ({classForm.subjectIds.length} selected)
+                  </span>
+                )}
+              </legend>
               {sortedSubjects.length ? (
-                <div className="mt-2 grid max-h-44 gap-2 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-2 grid max-h-44 gap-2 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {sortedSubjects.map((subject) => (
-                    <label key={subject.id} className="flex cursor-pointer items-center gap-2 rounded-md bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-indigo-50">
-                      <input type="checkbox" checked={classForm.subjectIds.includes(subject.id)} onChange={() => toggleClassSubject(subject.id)} className="h-4 w-4 rounded border-slate-300 text-indigo-600" />
-                      {subject.name}
+                    <label key={subject.id} className="flex cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-indigo-50">
+                      <input
+                        type="checkbox"
+                        checked={classForm.subjectIds.includes(subject.id)}
+                        onChange={() => toggleClassSubject(subject.id)}
+                        className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="truncate">{subject.name}</span>
                     </label>
                   ))}
                 </div>
-              ) : <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">Create subjects first, then assign them here.</p>}
+              ) : (
+                <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
+                  Create subjects in Step 2 first, then assign them here.
+                </p>
+              )}
             </fieldset>
-            <FormActions entityLabel="class" editing={editingClassId !== null} busy={busyAction === 'class-save'} onCancel={cancelClassEdit} />
+            <FormActions
+              entityLabel="class"
+              editing={editingClassId !== null}
+              busy={busyAction === 'class-save'}
+              onCancel={cancelClassEdit}
+            />
           </form>
           <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-3">
             {sortedClasses.length ? sortedClasses.map((classroom) => {
@@ -786,7 +931,7 @@ export default function AcademicSetupManager({ onChanged, onOpenTeachers, classN
               const assignedSubjects = sortedSubjects.filter((subject) => assignedSubjectIds.includes(subject.id));
               const classSections = sectionsByClass.get(classroom.id) || [];
               return (
-                <div key={classroom.id} className="rounded-xl border border-slate-200 p-4">
+                <div key={classroom.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-slate-300">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-extrabold text-slate-900">{classroom.name}</p>
@@ -824,34 +969,49 @@ export default function AcademicSetupManager({ onChanged, onOpenTeachers, classN
                       </span>
                     )) : (
                       <button type="button" onClick={() => focusSectionForm(classroom.id, classroom.name)} className="text-left text-xs font-semibold text-amber-700 hover:underline">
-                        No sections yet — add the first section
+                        No sections yet — click to add
                       </button>
                     )}
                   </div>
-                  <p className="mt-3 text-[10px] font-extrabold uppercase tracking-wide text-slate-500">Subjects</p>
+                  <p className="mt-3 text-[10px] font-extrabold uppercase tracking-wide text-slate-500">Subjects ({assignedSubjects.length})</p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {assignedSubjects.length ? assignedSubjects.map((subject) => <span key={subject.id} className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-bold text-indigo-700">{subject.name}</span>) : <span className="text-xs text-slate-500">No subjects assigned</span>}
+                    {assignedSubjects.length ? assignedSubjects.map((subject) => (
+                      <span key={subject.id} className="rounded-full border border-indigo-100 bg-indigo-50 px-2 py-1 text-[10px] font-bold text-indigo-700">
+                        {subject.name}
+                      </span>
+                    )) : (
+                      <span className="text-xs italic text-slate-400">No subjects assigned</span>
+                    )}
                   </div>
                 </div>
               );
-            }) : <div className="md:col-span-2 xl:col-span-3"><EmptyRow text="No classes have been created." /></div>}
+            }) : <div className="md:col-span-2 xl:col-span-3"><EmptyRow text="No classes have been created yet." /></div>}
           </div>
         </article>
 
-        <article id="academic-sections" className="scroll-mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
+        {/* Step 4: Add Sections to Each Class */}
+        <article id="academic-sections" className="scroll-mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 bg-slate-50/70 p-4">
-            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900"><StepBadge number={3} /><GraduationCap className="h-4 w-4 text-indigo-600" /> Add Sections to Each Class</h3>
-            <p className="mt-1 text-[11px] text-slate-500">Select a class, enter one section name, and create it. The class stays selected so you can quickly add the next section.</p>
+            <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+              <StepBadge number={4} />
+              <GraduationCap className="h-4 w-4 text-indigo-600" />
+              Add Sections to Each Class
+            </h3>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Select a class, enter one section name, and create it. The class stays selected so you can quickly add the next section.
+            </p>
           </div>
           <form ref={sectionFormRef} onSubmit={saveSection} className="grid gap-3 border-b border-slate-100 p-4 sm:grid-cols-2">
-            <label className={labelClass}>Class
+            <label className={labelClass}>
+              Class
               <select required value={sectionForm.classId} onChange={(event) => setSectionForm((current) => ({ ...current, classId: event.target.value }))} className={inputClass}>
                 <option value="">Select a class</option>
                 {sortedClasses.map((classroom) => <option key={classroom.id} value={classroom.id}>{classroom.name}</option>)}
               </select>
             </label>
-            <label className={labelClass}>Section name
-              <input ref={sectionNameRef} required maxLength={20} value={sectionForm.name} onChange={(event) => setSectionForm((current) => ({ ...current, name: event.target.value }))} placeholder="Example: A" className={inputClass} />
+            <label className={labelClass}>
+              Section name
+              <input ref={sectionNameRef} required maxLength={20} value={sectionForm.name} onChange={(event) => setSectionForm((current) => ({ ...current, name: event.target.value }))} placeholder="Example: A, B, Rose" className={inputClass} />
             </label>
             <FormActions entityLabel="section" editing={editingSectionId !== null} busy={busyAction === 'section-save'} disabled={!sortedClasses.length} onCancel={cancelSectionEdit} />
           </form>
@@ -859,12 +1019,17 @@ export default function AcademicSetupManager({ onChanged, onOpenTeachers, classN
             {sortedClasses.length ? sortedClasses.map((classroom) => {
               const classSections = sectionsByClass.get(classroom.id) || [];
               return (
-                <div key={classroom.id} className="rounded-xl border border-slate-200 p-4">
-                  <p className="text-sm font-extrabold text-slate-900">{classroom.name}</p>
+                <div key={classroom.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                    <p className="text-sm font-extrabold text-slate-900">{classroom.name}</p>
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                      {classSections.length} {classSections.length === 1 ? 'section' : 'sections'}
+                    </span>
+                  </div>
                   <div className="mt-3 space-y-2">
                     {classSections.length ? classSections.map((section) => (
-                      <div key={section.id} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2">
-                        <span className="text-xs font-bold text-slate-700">{section.name}</span>
+                      <div key={section.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                        <span className="text-xs font-bold text-slate-800">Section {section.name}</span>
                         <RowActions
                           compact
                           label={`${classroom.name} ${section.name}`}
@@ -893,20 +1058,21 @@ export default function AcademicSetupManager({ onChanged, onOpenTeachers, classN
           </div>
         </article>
 
-        <article className="rounded-xl border border-indigo-200 bg-indigo-50/60 p-5 shadow-sm xl:col-span-2">
+        {/* Step 5: Assign Existing Teachers */}
+        <article id="academic-teachers" className="scroll-mt-4 rounded-xl border border-indigo-200 bg-indigo-50/60 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <StepBadge number={4} />
+            <StepBadge number={5} />
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-extrabold text-slate-900">Assign Existing Teachers</h3>
               <p className="mt-1 text-xs leading-5 text-slate-600">
-                After subjects, classes, and sections are ready, open <strong>Teacher Profiles</strong> from the left menu and edit each teacher. Select every subject and section that teacher handles; one teacher can have multiple assignments.
+                After academic years, subjects, classes, and sections are ready, open <strong>Teacher Profiles</strong> from the left menu and edit each teacher. Select every subject and section that teacher handles; one teacher can have multiple assignments.
               </p>
-              <p className="mt-2 text-xs font-bold text-indigo-700">Timetable teacher choices appear only after those teacher assignments are saved.</p>
+              <p className="mt-2 text-xs font-bold text-indigo-700">Timetable teacher choices, class attendance, and subject marks appear only after those teacher assignments are saved.</p>
               {onOpenTeachers && (
                 <button
                   type="button"
                   onClick={onOpenTeachers}
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-extrabold text-white shadow-sm transition hover:bg-indigo-700"
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-indigo-700"
                 >
                   Open Teacher Profiles
                   <ArrowRight className="h-3.5 w-3.5" />

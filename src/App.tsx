@@ -58,6 +58,7 @@ import PublicLearningModule from './components/PublicLearningModule';
 import NotificationCenter from './components/NotificationCenter';
 import PushNotificationManager from './components/PushNotificationManager';
 import WorexaLogo from './components/WorexaLogo';
+import volpeLogo from './assets/volpe-logo.png';
 import { emitNotification } from './services/notificationBus';
 import { BRAND } from './config/branding';
 
@@ -1046,12 +1047,12 @@ function AuthenticatedApp() {
                     </div>
                   ) : (
                     <img
-                      src={brandSettings.logoImageUrl || 'https://placehold.co/120/4f46e5/ffffff?text=S'}
+                      src={brandSettings.logoImageUrl || volpeLogo}
                       alt="Logo"
-                      className={`w-8 h-8 rounded object-cover shrink-0 border ${isGlass ? 'border-slate-800' : 'border-slate-200'
+                      className={`w-8 h-8 rounded object-contain shrink-0 ${isGlass ? 'border border-slate-800' : 'border border-slate-200'
                         }`}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://placehold.co/120/4f46e5/ffffff?text=S';
+                        (e.target as HTMLImageElement).src = volpeLogo;
                       }}
                       referrerPolicy="no-referrer"
                     />
@@ -1164,11 +1165,11 @@ function AuthenticatedApp() {
                     </div>
                   ) : (
                     <img
-                      src={brandSettings.logoImageUrl || 'https://placehold.co/120/4f46e5/ffffff?text=S'}
+                      src={brandSettings.logoImageUrl || volpeLogo}
                       alt="Logo"
-                      className="w-7 h-7 rounded object-cover border border-slate-200"
+                      className="w-7 h-7 rounded object-contain border border-slate-200"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://placehold.co/120/4f46e5/ffffff?text=S';
+                        (e.target as HTMLImageElement).src = volpeLogo;
                       }}
                       referrerPolicy="no-referrer"
                     />

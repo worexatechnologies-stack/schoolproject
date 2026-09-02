@@ -91,10 +91,14 @@ export interface FeeStructureItem {
 }
 
 export interface QuarterFeeDetail {
-  quarter: 'Q1' | 'Q2' | 'Q3' | 'Q4';
+  id?: number | string;
+  quarter: 'Q1' | 'Q2' | 'Q3' | 'Q4' | string;
   name: string;
   amount: number;
   dueDate: string;
+  paidAmount?: number;
+  remainingAmount?: number;
+  status?: string;
 }
 
 export const getDefaultQuarters = (totalFee: number): QuarterFeeDetail[] => {
@@ -139,6 +143,7 @@ export interface StudentPayment {
   receiptNo: string;
   category?: string;
   installmentType?: string;
+  quarterId?: number | string;
 }
 
 export interface IndividualStudentFeeRecord {

@@ -411,7 +411,6 @@ export default function ParentExamResults({
                     className="rounded-2xl bg-indigo-600 px-5 py-2 text-xs font-black text-white hover:bg-indigo-700 shadow-xs transition cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                     title={!isMarksPublished ? 'Verify & publish marks in Marks Entry first' : ''}
                   >
-                    <Sparkles className="h-4 w-4" />
                     {isGenerating ? 'Generating...' : 'Generate Report Cards'}
                   </button>
                 )}

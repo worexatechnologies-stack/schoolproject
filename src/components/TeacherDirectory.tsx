@@ -674,6 +674,21 @@ export default function TeacherDirectory() {
     setPhotoFile(null);
     setPhotoPreview(teacher.photoUrl || '');
     setPhotoSummary('');
+
+    const scrollToTop = () => {
+      const pageEl = document.getElementById('teacher-profiles-page');
+      if (pageEl) {
+        pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      const mainEl = document.querySelector('main');
+      if (mainEl) {
+        mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    scrollToTop();
+    setTimeout(scrollToTop, 50);
   };
 
   const toggleStatus = async (teacher: TeacherRecord) => {
@@ -1010,8 +1025,8 @@ export default function TeacherDirectory() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => setDocumentsTeacherId(teacher.id)} className="mr-2 rounded-lg border border-indigo-200 p-2 text-indigo-600 hover:bg-indigo-50" title={`Documents (${teacher.documents.length})`}><FileText className="h-4 w-4" /></button>
-                    <button onClick={() => startEdit(teacher)} className="mr-2 rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"><Edit className="h-4 w-4" /></button>
-                    <button onClick={() => toggleStatus(teacher)} className="mr-2 rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50"><UserRoundCheck className="h-4 w-4" /></button>
+                    <button onClick={() => startEdit(teacher)} className="mr-2 rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50" title="Edit teacher details"><Edit className="h-4 w-4" /></button>
+                    <button onClick={() => toggleStatus(teacher)} className="mr-2 rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50" title="Toggle status"><UserRoundCheck className="h-4 w-4" /></button>
                     <button onClick={() => deleteTeacher(teacher)} className="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50" title="Delete teacher"><Trash2 className="h-4 w-4" /></button>
                   </td>
                 </tr>

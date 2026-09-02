@@ -96,6 +96,14 @@ interface ChatStudentInfo {
   admissionNo: string;
 }
 
+interface TeacherChildInfo {
+  studentName: string;
+  studentId: string | number;
+  className: string;
+  sectionName: string;
+  subjects: string[];
+}
+
 interface ChatContact {
   id: string | number;
   userId?: number;
@@ -272,14 +280,14 @@ export default function CommunicationModule({ user, isGlass = false, onNavigateT
   const copy = roleCopy[resolvedRole] || roleCopy['School Admin'];
 
   // ── Role-Specific Allowed Sub-Tabs ──────────────────────────────────────────
-  const allowedSubTabs = useMemo(() => {
+  const allowedSubTabs = useMemo<Array<'requests' | 'broadcasts' | 'chats'>>(() => {
     if (resolvedRole === 'Student') {
-      return ['requests'] as const;
+      return ['requests'];
     }
     if (resolvedRole === 'Parent') {
-      return ['chats'] as const;
+      return ['chats'];
     }
-    return ['requests', 'broadcasts', 'chats'] as const;
+    return ['requests', 'broadcasts', 'chats'];
   }, [resolvedRole]);
 
   // ── Main Sub-Tab State (Parent is locked to 'chats' only) ───────────────────
@@ -1270,16 +1278,12 @@ export default function CommunicationModule({ user, isGlass = false, onNavigateT
                 <h2 className={`text-base font-extrabold ${title}`}>
                   {resolvedRole === 'Student'
                     ? 'Class Notices & School Announcements'
-                    : resolvedRole === 'Parent'
-                      ? 'School & Class Notices'
-                      : 'Notifications & Staff Requests'}
+                    : 'Notifications & Staff Requests'}
                 </h2>
                 <p className={`text-xs ${muted}`}>
                   {resolvedRole === 'Student'
                     ? 'Official class alerts, timetable changes and school announcements'
-                    : resolvedRole === 'Parent'
-                      ? 'Official announcements from teachers and school administration'
-                      : 'Manage staff leave requests, approvals and incoming announcements'}
+                    : 'Manage staff leave requests, approvals and incoming announcements'}
                 </p>
               </div>
             </div>
@@ -1301,7 +1305,7 @@ export default function CommunicationModule({ user, isGlass = false, onNavigateT
                 </span>
                 {[
                   { id: 'all', label: 'All' },
-                  ...(resolvedRole !== 'Student' && resolvedRole !== 'Parent' ? [{ id: 'requests', label: 'Leave Requests' }] : []),
+                  ...(resolvedRole !== 'Student' ? [{ id: 'requests', label: 'Leave Requests' }] : []),
                   { id: 'urgent', label: 'Urgent' },
                   { id: 'general', label: 'Notices' },
                 ].map((f) => (

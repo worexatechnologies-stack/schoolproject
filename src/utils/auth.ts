@@ -1,6 +1,7 @@
 import { UserRole } from '../types';
 
 export interface AuthUser {
+  id?: number | string;
   email: string;
   name: string;
   role: UserRole;

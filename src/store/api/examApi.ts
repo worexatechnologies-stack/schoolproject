@@ -1,6 +1,8 @@
 import { baseApi } from './baseApi';
 import type { ExamTimetableRecord } from '../../types';
 
+export type { ExamTimetableRecord };
+
 export interface ExamRecord {
   id: number;
   schedule?: number | null;

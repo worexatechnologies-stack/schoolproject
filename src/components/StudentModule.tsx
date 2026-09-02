@@ -18,10 +18,6 @@ import {
   Trash2,
   Download,
   BookOpen,
-  MessageSquare,
-  Phone,
-  Send,
-  X
 } from 'lucide-react';
 import { Student, StudentDocument, UserRole } from '../types';
 import AuthenticatedImage from './AuthenticatedImage';
@@ -53,7 +49,6 @@ interface StudentModuleProps {
 }
 
 type StudentDetailsTab = 'Profile' | 'Performance' | 'Fees' | 'Attendance' | 'Documents' | 'History';
-type StudentMessageAudience = 'student' | 'parent';
 
 export default function StudentModule({
   students,
@@ -117,12 +112,6 @@ export default function StudentModule({
   const [academicSubjects, setAcademicSubjects] = useState<AcademicSubject[]>([]);
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
   const [structureError, setStructureError] = useState('');
-  const [messageTarget, setMessageTarget] = useState<{ student: Student; audience: StudentMessageAudience } | null>(null);
-  const [messageTitle, setMessageTitle] = useState('');
-  const [messageBody, setMessageBody] = useState('');
-  const [messageError, setMessageError] = useState('');
-  const [messageSuccess, setMessageSuccess] = useState('');
-  const [isSendingMessage, setIsSendingMessage] = useState(false);
   const classOptions = academicClasses;
   const sectionRecords = academicSections;
   const selectedClassRecord = classOptions.find((classroom) => classroom.name === newClass) || classOptions[0];
@@ -292,59 +281,6 @@ export default function StudentModule({
       `Student Email: ${details.studentEmail}`,
       `Parent Email: ${details.parentEmail}`,
     ].join('\n'));
-  };
-
-  const openMessageComposer = (student: Student, audience: StudentMessageAudience) => {
-    setMessageTarget({ student, audience });
-    setMessageTitle(audience === 'parent' ? `Update about ${student.name}` : 'Message from your teacher');
-    setMessageBody('');
-    setMessageError('');
-    setMessageSuccess('');
-  };
-
-  const closeMessageComposer = () => {
-    if (isSendingMessage) return;
-    setMessageTarget(null);
-    setMessageTitle('');
-    setMessageBody('');
-    setMessageError('');
-    setMessageSuccess('');
-  };
-
-  const sendScopedMessage = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!messageTarget || !messageTitle.trim() || !messageBody.trim()) return;
-
-    setIsSendingMessage(true);
-    setMessageError('');
-    setMessageSuccess('');
-    try {
-      const endpoint = messageTarget.audience === 'parent'
-        ? '/notifications/teacher-to-parents/'
-        : '/notifications/teacher-to-students/';
-      const result = await apiRequest<{ created: number }>(endpoint, {
-        method: 'POST',
-        body: JSON.stringify({
-          recipientMode: 'individual',
-          recipients: [messageTarget.student.id],
-          category: 'General',
-          title: messageTitle.trim(),
-          body: messageBody.trim(),
-        }),
-      });
-      if (result.created < 1) {
-        throw new Error(`No active ${messageTarget.audience} portal account is linked to this student.`);
-      }
-      const recipientLabel = messageTarget.audience === 'parent'
-        ? (messageTarget.student.parentName || 'guardian')
-        : messageTarget.student.name;
-      setMessageSuccess(`Notification sent to ${recipientLabel}.`);
-      setMessageBody('');
-    } catch (error) {
-      setMessageError(error instanceof Error ? error.message : 'The notification could not be sent.');
-    } finally {
-      setIsSendingMessage(false);
-    }
   };
 
   // Calculate cohort-wise dashboard stats corresponding to currently selected class filter
@@ -1243,29 +1179,15 @@ export default function StudentModule({
                         </div>
 
                         {isTeacherView && (
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <section className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-4">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Class subjects</span>
-                              <p className="mt-1 text-xs text-slate-600">Subjects configured for {selectedStudent.class} - {selectedStudent.section}.</p>
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                {selectedStudentSubjects.length ? selectedStudentSubjects.map((subject) => (
-                                  <span key={subject.id} className="rounded-full border border-indigo-200 bg-white px-2.5 py-1 text-[10px] font-bold text-indigo-700">{subject.name}</span>
-                                )) : <span className="text-xs font-semibold text-amber-700">No subjects are assigned to this class yet.</span>}
-                              </div>
-                            </section>
-                            <section className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Contact student or guardian</span>
-                              <p className="mt-1 text-xs text-slate-600">Notifications are sent only to the portal accounts linked to this student.</p>
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                <button type="button" onClick={() => openMessageComposer(selectedStudent, 'student')} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-bold text-white hover:bg-indigo-700">
-                                  <MessageSquare className="h-3.5 w-3.5" /> Send to student
-                                </button>
-                                <button type="button" onClick={() => openMessageComposer(selectedStudent, 'parent')} className="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50">
-                                  <Phone className="h-3.5 w-3.5" /> Send to guardian
-                                </button>
-                              </div>
-                            </section>
-                          </div>
+                          <section className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-4">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Class subjects</span>
+                            <p className="mt-1 text-xs text-slate-600">Subjects configured for {selectedStudent.class} - {selectedStudent.section}.</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {selectedStudentSubjects.length ? selectedStudentSubjects.map((subject) => (
+                                <span key={subject.id} className="rounded-full border border-indigo-200 bg-white px-2.5 py-1 text-[10px] font-bold text-indigo-700">{subject.name}</span>
+                              )) : <span className="text-xs font-semibold text-amber-700">No subjects are assigned to this class yet.</span>}
+                            </div>
+                          </section>
                         )}
 
                         {!isTeacherView && <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 space-y-1 text-xs text-slate-600">
@@ -1627,53 +1549,6 @@ export default function StudentModule({
             <button onClick={() => void navigator.clipboard?.writeText(`Login ID: ${revealedCredential.loginId}\nTemporary password: ${revealedCredential.temporaryPassword}`)} className="rounded-xl border border-indigo-200 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-50">Copy credentials</button>
             <button onClick={() => setRevealedCredential(null)} className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700">I copied it</button>
           </div>
-        </section>
-      </div>,
-      document.body,
-    )}
-    {isTeacherView && messageTarget && createPortal(
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeMessageComposer(); }}>
-        <section className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="student-message-title">
-          <header className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
-            <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Teacher notification</p>
-              <h2 id="student-message-title" className="mt-1 text-lg font-extrabold text-slate-900">
-                Send to {messageTarget.audience === 'parent' ? (messageTarget.student.parentName || 'guardian') : messageTarget.student.name}
-              </h2>
-              <p className="mt-1 text-xs text-slate-500">
-                {messageTarget.student.class} - {messageTarget.student.section} · {messageTarget.student.academicYear}
-              </p>
-            </div>
-            <button type="button" onClick={closeMessageComposer} disabled={isSendingMessage} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50" aria-label="Close message composer">
-              <X className="h-4 w-4" />
-            </button>
-          </header>
-
-          {messageSuccess ? (
-            <div className="p-6">
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">{messageSuccess}</div>
-              <button type="button" onClick={closeMessageComposer} className="mt-5 w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-indigo-700">Done</button>
-            </div>
-          ) : (
-            <form onSubmit={sendScopedMessage} className="space-y-4 p-5">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Notification title
-                <input required maxLength={160} value={messageTitle} onChange={(event) => setMessageTitle(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
-              </label>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Message
-                <textarea required rows={5} value={messageBody} onChange={(event) => setMessageBody(event.target.value)} placeholder={messageTarget.audience === 'parent' ? 'Write a clear update for the guardian...' : 'Write a clear message for the student...'} className="mt-1.5 w-full resize-y rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
-              </label>
-              <p className="rounded-lg bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500">The backend verifies this student belongs to one of your assigned class sections before sending. Delivery uses the linked portal account and push-notification devices.</p>
-              {messageError && <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">{messageError}</p>}
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
-                <button type="button" onClick={closeMessageComposer} disabled={isSendingMessage} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50">Cancel</button>
-                <button type="submit" disabled={isSendingMessage || !messageTitle.trim() || !messageBody.trim()} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300">
-                  <Send className="h-4 w-4" /> {isSendingMessage ? 'Sending...' : 'Send notification'}
-                </button>
-              </div>
-            </form>
-          )}
         </section>
       </div>,
       document.body,

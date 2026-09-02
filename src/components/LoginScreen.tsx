@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowRight, BookOpen, CheckCircle2, Eye, EyeOff, GraduationCap, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, CheckCircle2, Eye, EyeOff, GraduationCap, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
 import { AuthUser } from '../utils/auth';
 import { BrandSettings, UserRole } from '../types';
 import { useLoginMutation } from '../store/api/authApi';
 import { persistAuthSession } from '../store/api/baseApi';
 import WorexaLogo from './WorexaLogo';
 import schoolPortalHero from '../assets/school-portal-hero.png';
+import volpeLogo from '../assets/volpe-logo.png';
 import './LoginScreen.css';
 
 interface LoginScreenProps { onLogin: (user: AuthUser, token: string) => void; brandSettings?: BrandSettings; onPublicAccess?: () => void; }
@@ -108,9 +109,9 @@ export default function LoginScreen({ onLogin, brandSettings, onPublicAccess }: 
 
   return <main className="image-login" id="login-container">
     <div className="image-login__canvas">
-      <header className="image-login__brand"><div className="image-login__crest">{brandSettings?.logoType === 'image' && brandSettings.logoImageUrl ? <img src={brandSettings.logoImageUrl} alt="School logo" /> : <GraduationCap />}</div><div><strong>{schoolName}</strong><span>School management portal</span></div></header>
+      <header className="image-login__brand"><div className="image-login__crest"><img src={brandSettings?.logoType === 'image' && brandSettings.logoImageUrl ? brandSettings.logoImageUrl : volpeLogo} alt="Volpehub Education logo" /></div><div><strong>{schoolName}</strong><span>School management portal</span></div></header>
       <section className="image-login__access">
-        <div className="image-login__intro"><p><Sparkles /> SECURE ACCESS</p><h1>Welcome back</h1><span>Sign in to continue to your connected school workspace.</span></div>
+        <div className="image-login__intro"><p>SECURE ACCESS</p><h1>Welcome back</h1><span>Sign in to continue to your connected school workspace.</span></div>
         <div className="school-login__roles" aria-label="Choose your access portal">{roles.map(role => <button key={role} type="button" onClick={() => changeRole(role)} className={activeRole === role ? 'is-active' : ''}>{roleNames[role]}</button>)}</div>
         <form onSubmit={submit} className="school-login__form" id="manual-login-form">
           {errorMessage && <div className="school-login__error" role="alert">{errorMessage}</div>}

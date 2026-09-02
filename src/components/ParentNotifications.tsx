@@ -61,6 +61,9 @@ export default function ParentNotifications() {
         gender: s.gender || '',
         status: s.status || 'Active',
         academicYear: s.academicYear || s.academic_year || '',
+        address: s.address || '',
+        medicalConditions: s.medicalConditions || s.medical_conditions || '',
+        qrCodeData: s.qrCodeData || s.qr_code_data || '',
       }));
       setWards(normalized);
     } catch {

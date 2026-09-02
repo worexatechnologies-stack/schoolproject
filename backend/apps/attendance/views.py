@@ -280,9 +280,9 @@ class AttendanceViewSet(TenantScopedViewSet):
             date=date_val,
         ).select_related('subject', 'subject_teacher', 'subject_teacher__user')
 
-        # Group attendance records by period (All 7 Periods)
+        # Group attendance records by period (All 6 Periods)
         period_data = {}
-        for p in range(1, 8):
+        for p in range(1, 7):
             period_data[p] = {
                 'period': p,
                 'timeLabel': f'Period {p}',
@@ -405,9 +405,9 @@ class AttendanceViewSet(TenantScopedViewSet):
                     'attendanceRate': rate,
                 })
 
-        # 3. Period-Wise Analysis (Periods 1 to 7)
+        # 3. Period-Wise Analysis (Periods 1 to 6)
         period_stats = []
-        for p in range(1, 8):
+        for p in range(1, 7):
             p_records = qs.filter(period=p)
             total = p_records.count()
             present = p_records.filter(status=AttendanceRecord.Status.PRESENT).count()

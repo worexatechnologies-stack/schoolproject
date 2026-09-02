@@ -271,7 +271,7 @@ export default function FamilyFees({ role }: { role: 'Parent' | 'Student' }) {
         const sectionStr = structures.find(
           (s) => s.level === 'section' &&
           matchClass(s.targetClass, student.class) &&
-          s.targetSection?.toLowerCase() === student.section.toLowerCase()
+          s.targetSection?.toLowerCase() === (student.section || '').toLowerCase()
         );
         if (sectionStr) return sectionStr;
       }
@@ -519,7 +519,7 @@ export default function FamilyFees({ role }: { role: 'Parent' | 'Student' }) {
         paymentMethod: gatewayName,
         category: newPayment.category,
         installmentType: newPayment.installmentType,
-        quarterId: selectedQuarter?.id,
+        quarterId: selectedQuarter?.id ? Number(selectedQuarter.id) : undefined,
       });
 
       if (dbResult && dbResult.summary) {

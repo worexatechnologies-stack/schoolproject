@@ -82,7 +82,6 @@ const DEFAULT_PERIOD_TIMES = [
   '11:30 - 12:15',
   '01:00 - 01:45',
   '01:45 - 02:30',
-  '02:30 - 03:15',
 ];
 
 const normalizeToISO = (dateStr: string): string => {
@@ -678,13 +677,13 @@ export default function AttendanceModule({ students }: AttendanceModuleProps) {
           ---------------------------------------------------- */}
       {navStep === 'attendance' && (
         <div className="space-y-6">
-          {/* Timetable 7 Periods Strip */}
+          {/* Timetable 6 Periods Strip */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-indigo-600" />
                 <span className="text-xs font-black uppercase text-slate-900">
-                  7-Period Timetable for {dayOfWeek} ({currentDateISO}):
+                  6-Period Timetable for {dayOfWeek} ({currentDateISO}):
                 </span>
               </div>
               <span className="text-xs font-bold text-slate-600">
@@ -692,9 +691,9 @@ export default function AttendanceModule({ students }: AttendanceModuleProps) {
               </span>
             </div>
 
-            {/* 7 Period Buttons with live counts */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-              {[1, 2, 3, 4, 5, 6, 7].map((pNum) => {
+            {/* 6 Period Buttons with live counts */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+              {[1, 2, 3, 4, 5, 6].map((pNum) => {
                 const summary = periodSummaries.find((p) => p.period === pNum);
                 const isSelected = selectedPeriod === pNum;
                 const pPresent = summary ? summary.presentCount : 0;
@@ -823,14 +822,14 @@ export default function AttendanceModule({ students }: AttendanceModuleProps) {
                         </div>
                       </div>
 
-                      {/* Middle: 7 Periods Interactive Visual Display (P1 to P7) */}
+                      {/* Middle: 6 Periods Interactive Visual Display (P1 to P6) */}
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-extrabold uppercase text-slate-400 mr-1 hidden sm:inline">
-                          Today's 7 Periods:
+                          Today's 6 Periods:
                         </span>
 
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          {[1, 2, 3, 4, 5, 6, 7].map((pNum) => {
+                          {[1, 2, 3, 4, 5, 6].map((pNum) => {
                             const rec = studentDayRecords.find((r) => r.period === pNum);
                             const pStatus = rec?.status;
                             const isCurrent = selectedPeriod === pNum;
@@ -871,7 +870,7 @@ export default function AttendanceModule({ students }: AttendanceModuleProps) {
                             {presentCount}P / {absentCount}A
                           </span>
                           <span className="block text-[9px] font-bold text-slate-400">
-                            {studentDayRecords.length}/7 Logged
+                            {studentDayRecords.length}/6 Logged
                           </span>
                         </div>
 

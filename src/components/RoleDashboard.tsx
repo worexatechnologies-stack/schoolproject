@@ -389,7 +389,6 @@ export default function RoleDashboard({ role, userName, onNavigateToTab, isGlass
           {/* Status Pills */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur-md border border-white/25">
-              <Sparkles className="h-3.5 w-3.5 text-amber-200" />
               Parent Portal
             </span>
             <span className="rounded-full bg-black/20 px-3.5 py-1 text-xs font-bold text-rose-50 backdrop-blur-md">
